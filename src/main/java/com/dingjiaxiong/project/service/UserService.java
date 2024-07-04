@@ -2,7 +2,7 @@ package com.dingjiaxiong.project.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.dingjiaxiong.project.model.entity.User;
+import com.dingjiaxiong.xiongapi_common.model.entity.User;
 
 import javax.servlet.http.HttpServletRequest;
 

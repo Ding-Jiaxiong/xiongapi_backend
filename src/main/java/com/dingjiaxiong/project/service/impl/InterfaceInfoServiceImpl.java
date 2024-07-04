@@ -3,9 +3,9 @@ package com.dingjiaxiong.project.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dingjiaxiong.project.common.ErrorCode;
 import com.dingjiaxiong.project.exception.BusinessException;
-import com.dingjiaxiong.project.model.entity.InterfaceInfo;
 import com.dingjiaxiong.project.service.InterfaceInfoService;
 import com.dingjiaxiong.project.mapper.InterfaceInfoMapper;
+import com.dingjiaxiong.xiongapi_common.model.entity.InterfaceInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 

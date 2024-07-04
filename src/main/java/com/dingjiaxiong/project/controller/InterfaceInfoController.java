@@ -3,19 +3,20 @@ package com.dingjiaxiong.project.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dingjiaxiong.project.annotation.AuthCheck;
-import com.dingjiaxiong.project.common.BaseResponse;
-import com.dingjiaxiong.project.common.DeleteRequest;
-import com.dingjiaxiong.project.common.ErrorCode;
-import com.dingjiaxiong.project.common.ResultUtils;
+import com.dingjiaxiong.project.common.*;
 import com.dingjiaxiong.project.constant.CommonConstant;
 import com.dingjiaxiong.project.exception.BusinessException;
 import com.dingjiaxiong.project.model.dto.interfaceinfo.InterfaceInfoAddRequest;
+import com.dingjiaxiong.project.model.dto.interfaceinfo.InterfaceInfoInvokeRequest;
 import com.dingjiaxiong.project.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
 import com.dingjiaxiong.project.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
-import com.dingjiaxiong.project.model.entity.InterfaceInfo;
-import com.dingjiaxiong.project.model.entity.User;
+import com.dingjiaxiong.project.model.enums.InterfaceInfoStatusEnum;
 import com.dingjiaxiong.project.service.InterfaceInfoService;
 import com.dingjiaxiong.project.service.UserService;
+import com.dingjiaxiong.xiongapi_client_sdk.client.XiongApiClient;
+import com.dingjiaxiong.xiongapi_common.model.entity.InterfaceInfo;
+import com.dingjiaxiong.xiongapi_common.model.entity.User;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -195,5 +197,109 @@ public class InterfaceInfoController {
     }
 
     // endregion
+
+    // 上面是增删改查的接口
+
+    @Resource
+    private XiongApiClient xiongApiClient;
+
+
+    // 下面涉及到业务逻辑
+
+    /**
+     * 发布
+     *
+     * @param idRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/online")
+    @AuthCheck(mustRole = "admin")
+    public BaseResponse<Boolean> onlineInterfaceInfo(@RequestBody IdRequest idRequest,
+                                                     HttpServletRequest request) throws UnsupportedEncodingException {
+        if (idRequest == null || idRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = idRequest.getId();
+        // 判断是否存在
+        InterfaceInfo oldInterfaceInfo = interfaceinfoService.getById(id);
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        // 判断该接口是否可以调用
+        com.dingjiaxiong.xiongapi_client_sdk.model.User user = new com.dingjiaxiong.xiongapi_client_sdk.model.User();
+        user.setUsername("test");
+        String username = xiongApiClient.getUsernameByPost(user);
+        if (StringUtils.isBlank(username)) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
+        }
+        // 仅本人或管理员可修改
+        InterfaceInfo interfaceInfo = new InterfaceInfo();
+        interfaceInfo.setId(id);
+        interfaceInfo.setStatus(InterfaceInfoStatusEnum.ONLINE.getValue());
+        boolean result = interfaceinfoService.updateById(interfaceInfo);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 下线
+     *
+     * @param idRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/offline")
+    @AuthCheck(mustRole = "admin")
+    public BaseResponse<Boolean> offlineInterfaceInfo(@RequestBody IdRequest idRequest,
+                                                      HttpServletRequest request) {
+        if (idRequest == null || idRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = idRequest.getId();
+        // 判断是否存在
+        InterfaceInfo oldInterfaceInfo = interfaceinfoService.getById(id);
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        // 仅本人或管理员可修改
+        InterfaceInfo interfaceInfo = new InterfaceInfo();
+        interfaceInfo.setId(id);
+        interfaceInfo.setStatus(InterfaceInfoStatusEnum.OFFLINE.getValue());
+        boolean result = interfaceinfoService.updateById(interfaceInfo);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 测试调用
+     *
+     * @param interfaceInfoInvokeRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/invoke")
+    public BaseResponse<Object> invokeInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
+                                                    HttpServletRequest request) throws UnsupportedEncodingException {
+        if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = interfaceInfoInvokeRequest.getId();
+        String userRequestParams = interfaceInfoInvokeRequest.getUserRequestParams();
+        // 判断是否存在
+        InterfaceInfo oldInterfaceInfo = interfaceinfoService.getById(id);
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        if (oldInterfaceInfo.getStatus() == InterfaceInfoStatusEnum.OFFLINE.getValue()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已关闭");
+        }
+        User loginUser = userService.getLoginUser(request);
+        String accessKey = loginUser.getAccessKey();
+        String secretKey = loginUser.getSecretKey();
+        XiongApiClient tempClient = new XiongApiClient(accessKey, secretKey);
+        Gson gson = new Gson();
+        com.dingjiaxiong.xiongapi_client_sdk.model.User user = gson.fromJson(userRequestParams, com.dingjiaxiong.xiongapi_client_sdk.model.User.class);
+        String usernameByPost = tempClient.getUsernameByPost(user);
+        return ResultUtils.success(usernameByPost);
+    }
 
 }

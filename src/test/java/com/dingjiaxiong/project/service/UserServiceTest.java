@@ -1,6 +1,7 @@
 package com.dingjiaxiong.project.service;
 
-import com.dingjiaxiong.project.model.entity.User;
+
+import com.dingjiaxiong.xiongapi_common.model.entity.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

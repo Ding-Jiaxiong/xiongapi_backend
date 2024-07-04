@@ -1,0 +1,58 @@
+server:
+  port: 8090
+
+spring:
+  cloud:
+    gateway:
+
+      default-filters:
+        - AddResponseHeader=source, jiaxiong
+      routes:
+        - id: api_route
+          uri: http://localhost:8123
+          predicates:
+            - Path=/api/**
+
+#        - id: add_request_header_route
+#          uri: http://localhost:8123
+#          predicates:
+#            - Path=/api/**
+#          filters:
+#            - AddRequestHeader=jiaxiong, swag
+#            - AddRequestParameter=name, dog
+#            - name: CircuitBreaker
+#              args:
+#                name: myCircuitBreaker
+#                fallbackUri: forward:/fallback
+#
+#        - id: jiaxiong-fallback
+#          uri: https://www.baidu.com
+#          predicates:
+#            - Path=/fallback
+
+#        - id: after_route
+#          uri: https://yupi.icu
+#          predicates:
+#            - After=2017-01-20T17:42:47.789-07:00[America/Denver]
+
+#        - id: before_route
+#          uri: https://www.baidu.com
+#          predicates:
+#            - Before=2025-01-20T17:42:47.789-07:00[America/Denver]
+
+logging:
+  level:
+    org:
+      springframework:
+        cloud:
+          gateway: trace
+
+dubbo:
+  application:
+    name: dubbo-springboot-demo-provider
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    id: nacos-registry
+    address: nacos://localhost:8848

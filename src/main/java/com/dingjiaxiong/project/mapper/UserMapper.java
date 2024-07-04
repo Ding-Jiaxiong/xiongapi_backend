@@ -1,7 +1,7 @@
 package com.dingjiaxiong.project.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.dingjiaxiong.project.model.entity.User;
+import com.dingjiaxiong.xiongapi_common.model.entity.User;
 
 /**
  * @Entity com.dingjiaxiong.project.model.domain.User

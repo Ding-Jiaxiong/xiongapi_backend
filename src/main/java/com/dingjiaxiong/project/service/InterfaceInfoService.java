@@ -1,7 +1,7 @@
 package com.dingjiaxiong.project.service;
 
-import com.dingjiaxiong.project.model.entity.InterfaceInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.dingjiaxiong.xiongapi_common.model.entity.InterfaceInfo;
 
 /**
 * @author DingJiaxiong

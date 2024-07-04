@@ -14,6 +14,10 @@ create table if not exists user
     gender       tinyint                                null comment '性别',
     userRole     varchar(256) default 'user'            not null comment '用户角色：user / admin',
     userPassword varchar(512)                           not null comment '密码',
+
+    `accessKey`  varchar(512)                           not null comment 'accessKey',
+    `secretKey`  varchar(512)                           not null comment 'secretKey',
+
     createTime   datetime     default CURRENT_TIMESTAMP not null comment '创建时间',
     updateTime   datetime     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     isDelete     tinyint      default 0                 not null comment '是否删除',
@@ -43,3 +47,14 @@ create table if not exists post
     updateTime    datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     isDelete      tinyint  default 0                 not null comment '是否删除'
 ) comment '帖子';
+
+INSERT INTO `xiongapi`.`user` (`id`, `userName`, `userAccount`, `userAvatar`, `gender`, `userRole`, `userPassword`,
+                               `createTime`, `updateTime`, `isDelete`)
+VALUES (1, 'dingding', 'dingjiaxiong', 'https://avatars.githubusercontent.com/u/61930795?v=4', 0, 'admin',
+        'b0dd3697a192885d7c055db46155b26a', '2024-07-02 10:51:48', '2024-07-02 13:02:04', 0);
+INSERT INTO `xiongapi`.`user` (`id`, `userName`, `userAccount`, `userAvatar`, `gender`, `userRole`, `userPassword`,
+                               `createTime`, `updateTime`, `isDelete`)
+VALUES (2, 'haimian', 'haimianbaobao',
+        'https://img2.baidu.com/it/u=1377871525,3691412687&fm=253&fmt=auto&app=120&f=JPEG?w=532&h=500', 0, 'user',
+        'b0dd3697a192885d7c055db46155b26a', '2024-07-02 15:17:12', '2024-07-02 15:18:07', 0);
+

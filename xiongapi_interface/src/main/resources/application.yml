@@ -1,0 +1,9 @@
+server:
+  port: 8123
+  servlet:
+    context-path: /api
+
+xiongapi:
+  client:
+    access-key: jiaxiong
+    secret-key: ab
